@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 use crate::List::{Cons, Nil};
 
@@ -10,8 +10,9 @@ enum List {
 
 #[derive(Debug)]
 struct Node {
-    value: i32,
+    num: i32,
     children: RefCell<Vec<Rc<Node>>>,
+    parent: RefCell<Weak<Node>>,
 }
 
 impl List {
@@ -46,14 +47,28 @@ fn main() {
     // println!("a next item: {:?}", a.tail());
 
     let leaf = Rc::new(Node {
-        value: 5,
+        num: 5,
+        parent: RefCell::new(Weak::new()),
         children: RefCell::new(vec![]),
     });
 
-    let branch = Rc::new(Node {
-        value: 10,
-        children: RefCell::new(vec![Rc::clone(&leaf)]),:
+    println!("leaf strong={} weak={}", Rc::strong_count(&leaf), Rc::weak_count(&leaf));
 
-    });
+    {
+        let branch = Rc::new(Node {
+            num: 10,
+            parent: RefCell::new(Weak::new()),
+            children: RefCell::new(vec![Rc::clone(&leaf)]),
+        });
+
+        *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+        println!("brach strong={} weak={}", Rc::strong_count(&branch), Rc::weak_count(&branch));
+
+        println!("leaf strong={} weak={}", Rc::strong_count(&leaf), Rc::weak_count(&leaf));
+    }
+
+    println!("leaf parent: {:?}", leaf.parent.borrow().upgrade());
+    println!("leaf strong={} weak={}", Rc::strong_count(&leaf), Rc::weak_count(&leaf));
 }
 
