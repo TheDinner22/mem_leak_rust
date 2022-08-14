@@ -8,6 +8,12 @@ enum List {
     Nil,
 }
 
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
 impl List {
     fn tail(&self) -> Option<&RefCell<Rc<List>>> {
         match self {
@@ -37,7 +43,17 @@ fn main() {
     println!("a rc count after changing b: {}", Rc::strong_count(&a));
 
     // this line creates a cycle and overflows the stack
-    println!("a next item: {:?}", a.tail());
+    // println!("a next item: {:?}", a.tail());
+
+    let leaf = Rc::new(Node {
+        value: 5,
+        children: RefCell::new(vec![]),
+    });
+
+    let branch = Rc::new(Node {
+        value: 10,
+        children: RefCell::new(vec![Rc::clone(&leaf)]),:
+
+    });
 }
 
-// at the diagram pooop other computer
