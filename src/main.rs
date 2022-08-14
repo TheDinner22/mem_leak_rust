@@ -40,4 +40,4 @@ fn main() {
     println!("a next item: {:?}", a.tail());
 }
 
-// at the diagram
+// at the diagram pooop
